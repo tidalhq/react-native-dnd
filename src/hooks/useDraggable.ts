@@ -1,7 +1,7 @@
 import { useLayoutEffect } from "react";
-import { LayoutRectangle, ViewProps } from "react-native";
+import { ViewProps } from "react-native";
 import { runOnUI, useSharedValue } from "react-native-reanimated";
-import { DraggableState, useDndContext } from "../DndContext";
+import { DraggableState, LayoutRectangleWithNodeLayout, useDndContext } from "../DndContext";
 import { useLatestSharedValue, useNodeRef } from "../hooks";
 import { Data, NativeElement, UniqueIdentifier } from "../types";
 import { assert, isReanimatedSharedValue } from "../utils";
@@ -64,11 +64,12 @@ export const useDraggable = ({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const sharedData = isReanimatedSharedValue(data) ? data : useLatestSharedValue(data);
 
-  const layout = useSharedValue<LayoutRectangle>({
+  const layout = useSharedValue<LayoutRectangleWithNodeLayout>({
     x: 0,
     y: 0,
     width: 0,
     height: 0,
+    nodeLayout: { x: 0, y: 0, width: 0, height: 0 },
   });
   const offset = useSharedPoint(0, 0);
   const restingOffset = useSharedPoint(0, 0);
@@ -101,10 +102,15 @@ export const useDraggable = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const onLayout: ViewProps["onLayout"] = () => {
+  const onLayout: ViewProps["onLayout"] = (e) => {
     assert(containerRef.current);
+    // node.current?.measureLayout(containerRef.current, (x, y, width, height) => {
+    //   layout.value = { x, y, width, height };
+    // });
+    const l = e.nativeEvent.layout;
     node.current?.measureLayout(containerRef.current, (x, y, width, height) => {
-      layout.value = { x, y, width, height };
+      // handle node can be different from the layout node
+      layout.value = { x, y, width, height, nodeLayout: l };
     });
   };
 

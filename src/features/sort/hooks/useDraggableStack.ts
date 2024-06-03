@@ -52,7 +52,7 @@ export const useDraggableStack = ({
         return;
       }
 
-      const activeLayout = layouts[activeId].value;
+      const activeLayout = layouts[activeId].value.nodeLayout;
       const prevActiveIndex = prevOrder.findIndex((id) => id === activeId);
       const nextActiveIndex = nextOrder.findIndex((id) => id === activeId);
       const nextActiveOffset = { x: 0, y: 0 };
@@ -82,9 +82,9 @@ export const useDraggableStack = ({
 
         // Accummulate the directional offset for the active item
         if (nextIndex < nextActiveIndex && prevIndex > prevActiveIndex) {
-          nextActiveOffset[axis] += layouts[itemId].value[size] + gap;
+          nextActiveOffset[axis] += layouts[itemId].value.nodeLayout[size] + gap;
         } else if (nextIndex > nextActiveIndex && prevIndex < prevActiveIndex) {
-          nextActiveOffset[axis] -= layouts[itemId].value[size] + gap;
+          nextActiveOffset[axis] -= layouts[itemId].value.nodeLayout[size] + gap;
         }
       }
       // Update the active item offset

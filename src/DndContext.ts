@@ -5,18 +5,23 @@ import type { SharedValue } from "react-native-reanimated";
 import type { DraggableConstraints, SharedPoint } from "./hooks";
 import type { SharedData, UniqueIdentifier } from "./types";
 
+export type LayoutRectangleWithNodeLayout = LayoutRectangle & {
+  nodeLayout: LayoutRectangle;
+};
+
 export type ItemOptions = { id: UniqueIdentifier; data: SharedData; disabled: boolean };
 export type DraggableItemOptions = ItemOptions & DraggableConstraints;
 export type DraggableOptions = Record<UniqueIdentifier, DraggableItemOptions>;
 export type DroppableOptions = Record<UniqueIdentifier, ItemOptions>;
 export type Layouts = Record<UniqueIdentifier, SharedValue<LayoutRectangle>>;
+export type LayoutsWithNodeLayouts = Record<UniqueIdentifier, SharedValue<LayoutRectangleWithNodeLayout>>;
 export type Offsets = Record<UniqueIdentifier, SharedPoint>;
 export type DraggableState = "resting" | "pending" | "dragging" | "dropping" | "acting";
 export type DraggableStates = Record<UniqueIdentifier, SharedValue<DraggableState>>;
 
 export type DndContextValue = {
   containerRef: RefObject<View>;
-  draggableLayouts: SharedValue<Layouts>;
+  draggableLayouts: SharedValue<LayoutsWithNodeLayouts>;
   droppableLayouts: SharedValue<Layouts>;
   draggableOptions: SharedValue<DraggableOptions>;
   droppableOptions: SharedValue<DroppableOptions>;
@@ -26,7 +31,7 @@ export type DndContextValue = {
   draggablePendingId: SharedValue<UniqueIdentifier | null>;
   draggableActiveId: SharedValue<UniqueIdentifier | null>;
   droppableActiveId: SharedValue<UniqueIdentifier | null>;
-  draggableActiveLayout: SharedValue<LayoutRectangle | null>;
+  draggableActiveLayout: SharedValue<LayoutRectangleWithNodeLayout | null>;
   draggableInitialOffset: SharedPoint;
   draggableContentOffset: SharedPoint;
   panGestureState: SharedValue<GestureEventPayload["state"]>;

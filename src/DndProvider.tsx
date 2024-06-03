@@ -25,7 +25,9 @@ import {
   type DraggableOptions,
   type DroppableOptions,
   type ItemOptions,
+  type LayoutRectangleWithNodeLayout,
   type Layouts,
+  type LayoutsWithNodeLayouts,
   type Offsets,
 } from "./DndContext";
 import { useSharedPoint } from "./hooks";
@@ -37,7 +39,6 @@ import {
   includesPoint,
   overlapsRectangle,
   Point,
-  Rectangle,
 } from "./utils";
 
 export type DndProviderProps = {
@@ -87,7 +88,7 @@ export const DndProvider = forwardRef<DndProviderHandle, PropsWithChildren<DndPr
     ref,
   ) {
     const containerRef = useRef<View | null>(null);
-    const draggableLayouts = useSharedValue<Layouts>({});
+    const draggableLayouts = useSharedValue<LayoutsWithNodeLayouts>({});
     const droppableLayouts = useSharedValue<Layouts>({});
     const draggableOptions = useSharedValue<DraggableOptions>({});
     const droppableOptions = useSharedValue<DroppableOptions>({});
@@ -97,7 +98,7 @@ export const DndProvider = forwardRef<DndProviderHandle, PropsWithChildren<DndPr
     const draggablePendingId = useSharedValue<UniqueIdentifier | null>(null);
     const draggableActiveId = useSharedValue<UniqueIdentifier | null>(null);
     const droppableActiveId = useSharedValue<UniqueIdentifier | null>(null);
-    const draggableActiveLayout = useSharedValue<Rectangle | null>(null);
+    const draggableActiveLayout = useSharedValue<LayoutRectangleWithNodeLayout | null>(null);
     const draggableInitialOffset = useSharedPoint(0, 0);
     const draggableContentOffset = useSharedPoint(0, 0);
     const panGestureState = useSharedValue<GestureEventPayload["state"]>(0);
@@ -259,10 +260,13 @@ export const DndProvider = forwardRef<DndProviderHandle, PropsWithChildren<DndPr
               // @TODO activeLayout
             } else {
               draggableActiveId.value = activeId;
-              draggableActiveLayout.value = applyOffset(activeLayout, {
-                x: activeOffset.x.value,
-                y: activeOffset.y.value,
-              });
+              draggableActiveLayout.value = {
+                ...applyOffset(activeLayout, {
+                  x: activeOffset.x.value,
+                  y: activeOffset.y.value,
+                }),
+                nodeLayout: activeLayout,
+              };
               draggableStates.value[activeId].value = "dragging";
             }
             if (onBegin) {
@@ -302,10 +306,13 @@ export const DndProvider = forwardRef<DndProviderHandle, PropsWithChildren<DndPr
           activeOffset.y.value = draggableInitialOffset.y.value + translationY;
           // Check potential droppable candidates
           const activeLayout = layouts[activeId].value;
-          draggableActiveLayout.value = applyOffset(activeLayout, {
-            x: activeOffset.x.value,
-            y: activeOffset.y.value,
-          });
+          draggableActiveLayout.value = {
+            ...applyOffset(activeLayout, {
+              x: activeOffset.x.value,
+              y: activeOffset.y.value,
+            }),
+            nodeLayout: activeLayout,
+          };
           droppableActiveId.value = findDroppableLayoutId(draggableActiveLayout.value);
           if (onUpdate) {
             onUpdate(event, { activeId, activeLayout: draggableActiveLayout.value });
